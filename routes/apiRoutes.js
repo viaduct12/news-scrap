@@ -6,7 +6,39 @@ module.exports = app => {
   // A GET route for scraping the echoJS website
   app.get("/scrape", function (req, res) {
     // First, we grab the body of the html with axios
-    axios.get("https://www.bbc.com/news/world/us_and_canada").then(function (response) {
+    // axios.get("https://www.bbc.com/news/world/us_and_canada").then(function (response) {
+    //   // Then, we load that into cheerio and save it to $ for a shorthand selector
+    //   var $ = cheerio.load(response.data);
+
+    //   // Now, we grab every h2 within an article tag, and do the following:
+    //   $("article").each(function (i, element) {
+    //     // Save an empty result object
+    //     var result = {};
+
+    //     // Add the text and href of every link, and save them as properties of the result object
+    //     result.link = $(this)
+    //       .children("header")
+    //       .children("div")
+    //       .children("h3")
+    //       .children("a")
+    //       .attr("href");
+    //     result.title = $(this)
+    //       .children("header")
+    //       .children("div")
+    //       .children("h3")
+    //       .children("a")
+    //       .children("span")
+    //       .text();
+    //     result.summary = $(this)
+    //       .children("div")
+    //       .children("div")
+    //       .children("div")
+    //       .children("div")
+    //       .children("div")
+    //       .children("p")
+    //       .text();
+
+        axios.get("https://www.bbc.com/news/world/us_and_canada").then(function (response) {
       // Then, we load that into cheerio and save it to $ for a shorthand selector
       var $ = cheerio.load(response.data);
 
@@ -38,18 +70,31 @@ module.exports = app => {
           .children("p")
           .text();
 
-        // Now, we grab every h2 within an article tag, and do the following:
+        
+          //dupe check ?
 
-        // Create a new Article using the `result` object built from scraping
-        db.Article.create(result)
-          .then(function (dbArticle) {
-            // View the added result in the console
-            console.log(dbArticle);
-          })
-          .catch(function (err) {
-            // If an error occurred, log it
-            console.log(err);
-          });
+        db.Article.find({}).then(dbResult => {
+
+          if (dbResult.length === 0){
+            // Create a new Article using the `result` object built from scraping
+            db.Article.create(result)
+              .then(function (dbArticle) {
+                // View the added result in the console
+                console.log(dbArticle);
+              })
+              .catch(function (err) {
+                // If an error occurred, log it
+                console.log(err);
+              });
+          } else {
+            db.Article.update(result).then(dbResult => {
+              console.log(dbResult, "update function");
+            }).catch(err => {
+              console.log(err);
+            })
+          }
+        })
+
       });
 
       // Send a message to the client
@@ -110,6 +155,17 @@ module.exports = app => {
         // If an error occurred, send it to the client
         res.json(err);
       });
+  });
+
+  app.get("/comment", (req, res) => {
+    console.log("comment seciont")
+    res.send("cherry");
+  })
+
+  app.get("/clear", (req, res) => {
+    console.log("clear route");
+    db.Article.collection.drop();
+    res.redirect("/");
   });
 }
 

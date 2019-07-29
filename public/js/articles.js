@@ -4,8 +4,6 @@ $(document).ready(() => {
 
 function getArticles(){
   $.get("/api/articles", (req, res) => {
-    // console.log(req.data.length, " what this be /public/js/articles.js");
-
 
     for(var i = 0; i < req.data.length; i++){
       console.log(req.data[i]._id, "for loop id");
@@ -33,9 +31,10 @@ function getArticles(){
 
       var aTwo = $("<a>");
       aTwo.attr({
-        class: "btn btn-success save"
+        class: "btn btn-success save",
+        href: "/comment"
       });
-      aTwo.text("Save Article");
+      aTwo.text("Leave a Comment");
 
       var divThree = $("<div>");
       divThree.addClass("card-body");
